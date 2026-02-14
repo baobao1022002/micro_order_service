@@ -1,0 +1,15 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: ShoppingProject
+  datasource:
+    url: "jdbc:mysql://localhost:3306/micro_practice_order"
+    driverClassName: "com.mysql.cj.jdbc.Driver"
+    username: root
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
