@@ -1,6 +1,8 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.clients.ProductFilter;
+import com.example.demo.clients.dto.LockProductDTO;
+import com.example.demo.clients.dto.LockProductItemDTO;
 import com.example.demo.clients.impl.ProductClientImpl;
 import com.example.demo.dto.OrderDTO;
 import com.example.demo.dto.OrderItemDTO;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -67,7 +70,14 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
+        List<LockProductItemDTO> productItems = orderDto.getOrderItems().stream()
+                .map(orderItem ->
+                new LockProductItemDTO(orderItem.getProductId(), orderItem.getQuantity()))
+                .collect(Collectors.toList());
 
+        LockProductDTO lockProductDTO = new LockProductDTO();
+        lockProductDTO.setItems(productItems);
+        productClientImpl.lockProduct(lockProductDTO);
         order.setTotalAmount(totalAmount);
         order.setStatus(OrderStatus.CREATED);
 

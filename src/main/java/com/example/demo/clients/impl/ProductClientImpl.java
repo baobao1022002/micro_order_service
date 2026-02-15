@@ -1,6 +1,8 @@
 package com.example.demo.clients.impl;
 
+import com.example.demo.clients.ProductClient;
 import com.example.demo.clients.ProductFilter;
+import com.example.demo.clients.dto.LockProductDTO;
 import com.example.demo.common.BaseResponse;
 import com.example.demo.dto.ProductDTO;
 import com.example.demo.exception.BusinessException;
@@ -13,7 +15,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class ProductClientImpl implements com.example.demo.clients.ProductClient {
+public class ProductClientImpl implements ProductClient {
     private final WebClient.Builder webclientBuilder;
 
     @Override
@@ -31,4 +33,18 @@ public class ProductClientImpl implements com.example.demo.clients.ProductClient
         }
         return response.getData();
     }
+
+    @Override
+    public boolean lockProduct(LockProductDTO lockProduct) {
+        BaseResponse<Boolean> response = webclientBuilder.build()
+                .post()
+                .uri("http://localhost:8888/v1/products/lock")
+                .bodyValue(lockProduct)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<BaseResponse<Boolean>>() {
+                }).block();
+        return response.getData();
+    }
+
+
 }
