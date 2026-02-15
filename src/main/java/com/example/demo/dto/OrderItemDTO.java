@@ -1,6 +1,5 @@
-package com.example.demo.dto.request;
+package com.example.demo.dto;
 
-import com.example.demo.enums.OrderStatus;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -8,16 +7,16 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class CreateOrderReq {
+@AllArgsConstructor
+public class OrderItemDTO {
 
     @NotEmpty
-    private String customerId;
+    private String productId;
 
-    @NotEmpty
-    private List<CreateOrderItemReq> orderItems;
+    @NotNull
+    @Positive
+    private Integer quantity;
+
 }

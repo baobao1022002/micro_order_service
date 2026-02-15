@@ -1,7 +1,8 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.request.BaseResponse;
-import com.example.demo.dto.request.CreateOrderReq;
+import com.example.demo.common.BaseResponse;
+
+import com.example.demo.dto.OrderDTO;
 import com.example.demo.entity.Order;
 import com.example.demo.service.OrderService;
 import jakarta.validation.Valid;
@@ -24,7 +25,7 @@ public class OrderController {
 
     // CREATE
     @PostMapping
-    public ResponseEntity<BaseResponse<Order>> create( @RequestBody @Valid CreateOrderReq req) {
+    public ResponseEntity<BaseResponse<Order>> create(@RequestBody @Valid OrderDTO req) {
 
         return ResponseEntity.ok(
                 new BaseResponse<>(orderService.create(req), "Success")

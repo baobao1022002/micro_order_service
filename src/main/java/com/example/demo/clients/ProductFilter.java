@@ -1,13 +1,14 @@
-package com.example.demo.dto.request;
+package com.example.demo.clients;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BaseResponse <T> {
-    private T data;
-    private String message;
+public class ProductFilter {
+    private List<String> ids;
 }
