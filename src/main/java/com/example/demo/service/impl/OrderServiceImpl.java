@@ -14,9 +14,12 @@ import com.example.demo.exception.BusinessException;
 import com.example.demo.mapper.OrderMapper;
 import com.example.demo.repository.OrderRepository;
 import com.example.demo.service.OrderService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -24,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -32,9 +36,10 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
     private final ProductClientImpl productClientImpl;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
-    public Order create(OrderDTO orderDto) {
+    public Order create(OrderDTO orderDto) throws JsonProcessingException {
 
         List<String> productIds = orderDto.getOrderItems().stream()
                 .map(OrderItemDTO::getProductId)
@@ -72,7 +77,7 @@ public class OrderServiceImpl implements OrderService {
 
         List<LockProductItemDTO> productItems = orderDto.getOrderItems().stream()
                 .map(orderItem ->
-                new LockProductItemDTO(orderItem.getProductId(), orderItem.getQuantity()))
+                        new LockProductItemDTO(orderItem.getProductId(), orderItem.getQuantity()))
                 .collect(Collectors.toList());
 
         LockProductDTO lockProductDTO = new LockProductDTO();
@@ -81,7 +86,10 @@ public class OrderServiceImpl implements OrderService {
         order.setTotalAmount(totalAmount);
         order.setStatus(OrderStatus.CREATED);
 
-        return orderRepository.save(order);
+        Order createdOrder = orderRepository.save(order);
+        kafkaTemplate.send("order_created", createdOrder);
+        log.info("Publish new order success to order_created");
+        return createdOrder;
     }
 
     @Override

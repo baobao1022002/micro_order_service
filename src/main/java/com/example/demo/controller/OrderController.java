@@ -1,16 +1,16 @@
 package com.example.demo.controller;
 
 import com.example.demo.common.BaseResponse;
-
 import com.example.demo.dto.OrderDTO;
 import com.example.demo.entity.Order;
 import com.example.demo.service.OrderService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,8 +25,7 @@ public class OrderController {
 
     // CREATE
     @PostMapping
-    public ResponseEntity<BaseResponse<Order>> create(@RequestBody @Valid OrderDTO req) {
-
+    public ResponseEntity<BaseResponse<Order>> create(@RequestBody @Valid OrderDTO req) throws JsonProcessingException {
         return ResponseEntity.ok(
                 new BaseResponse<>(orderService.create(req), "Success")
         );
@@ -45,7 +44,7 @@ public class OrderController {
     // GET ALL
     @GetMapping
     public ResponseEntity<BaseResponse<List<Order>>> getAll(@PageableDefault(page = 0, size = 10, sort = "createdDate", direction = Sort.Direction.DESC)
-                                                                Pageable pageable) {
+                                                            Pageable pageable) {
 
         return ResponseEntity.ok(
                 new BaseResponse<>(orderService.getAll(pageable), "Success")
