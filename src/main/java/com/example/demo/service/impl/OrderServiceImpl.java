@@ -1,8 +1,6 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.clients.ProductFilter;
-import com.example.demo.clients.dto.LockProductDTO;
-import com.example.demo.clients.dto.LockProductItemDTO;
 import com.example.demo.clients.impl.ProductClientImpl;
 import com.example.demo.dto.OrderDTO;
 import com.example.demo.dto.OrderItemDTO;
@@ -14,7 +12,6 @@ import com.example.demo.exception.BusinessException;
 import com.example.demo.mapper.OrderMapper;
 import com.example.demo.repository.OrderRepository;
 import com.example.demo.service.OrderService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +22,6 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -39,7 +35,7 @@ public class OrderServiceImpl implements OrderService {
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
-    public Order create(OrderDTO orderDto) throws JsonProcessingException {
+    public Order create(OrderDTO orderDto) {
 
         List<String> productIds = orderDto.getOrderItems().stream()
                 .map(OrderItemDTO::getProductId)
@@ -53,16 +49,13 @@ public class OrderServiceImpl implements OrderService {
             productPriceMap.put(p.getId(), p);
         });
 
-        Order order = orderMapper.fromProductRequest(orderDto);
-        order.setIsDeleted(false);
-
+        Order order = orderMapper.fromOrderRequest(orderDto);
         int totalAmount = 0;
 
         if (order.getOrderItems() != null) {
             for (OrderItem orderItem : order.getOrderItems()) {
-                orderItem.setIsDeleted(false);
-                orderItem.setOrder(order);
                 ProductDTO product = productPriceMap.get(orderItem.getProductId());
+                orderItem.setPrice(product.getPrice());
                 if (product == null) {
                     throw new BusinessException("Product with id " + orderItem.getProductId() + " not existed");
                 }
@@ -74,15 +67,14 @@ public class OrderServiceImpl implements OrderService {
                 totalAmount += (product.getPrice() * orderItem.getQuantity());
             }
         }
-
-        List<LockProductItemDTO> productItems = orderDto.getOrderItems().stream()
-                .map(orderItem ->
-                        new LockProductItemDTO(orderItem.getProductId(), orderItem.getQuantity()))
-                .collect(Collectors.toList());
-
-        LockProductDTO lockProductDTO = new LockProductDTO();
-        lockProductDTO.setItems(productItems);
-        productClientImpl.lockProduct(lockProductDTO);
+//        code for synchronized
+//        List<LockProductItemDTO> productItems = orderDto.getOrderItems().stream()
+//                .map(orderItem ->
+//                        new LockProductItemDTO(orderItem.getProductId(), orderItem.getQuantity()))
+//                .collect(Collectors.toList());
+//        LockProductDTO lockProductDTO = new LockProductDTO();
+//        lockProductDTO.setItems(productItems);
+//        productClientImpl.lockProduct(lockProductDTO);
         order.setTotalAmount(totalAmount);
         order.setStatus(OrderStatus.CREATED);
 
@@ -96,7 +88,7 @@ public class OrderServiceImpl implements OrderService {
     public Order getById(String id) {
 
         return orderRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("Order not found"));
+                .orElseThrow(() -> new BusinessException("Order not found with id: " + id));
     }
 
     @Override
@@ -119,4 +111,12 @@ public class OrderServiceImpl implements OrderService {
 
         orderRepository.deleteAll();
     }
+
+    @Override
+    public void updateStatus(String id, OrderStatus status) {
+        Order order = getById(id);
+        order.setStatus(status);
+        orderRepository.save(order);
+    }
+
 }

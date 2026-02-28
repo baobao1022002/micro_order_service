@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.dto.OrderDTO;
 import com.example.demo.entity.Order;
+import com.example.demo.enums.OrderStatus;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.data.domain.Pageable;
 
@@ -17,4 +18,7 @@ public interface OrderService {
     void deleteById(String id);
 
     void deleteAll();
+
+    void updateStatus(String id, OrderStatus status);
+
 }

@@ -1,6 +1,7 @@
 package com.example.demo.entity;
 
 
+import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import lombok.AllArgsConstructor;
@@ -21,7 +22,8 @@ import java.time.Instant;
 @EntityListeners(AuditingEntityListener.class)
 public class BaseEntity {
 
-    private Boolean isDeleted;
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
 
     @CreatedDate
     private Instant createdDate;
