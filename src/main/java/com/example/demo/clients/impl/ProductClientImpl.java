@@ -22,7 +22,7 @@ public class ProductClientImpl implements ProductClient {
     public List<ProductDTO> getProductsByIds(ProductFilter productFilter) {
         BaseResponse<List<ProductDTO>> response = webclientBuilder.build()
                 .post()
-                .uri("http://localhost:8888/v1/products/search")
+                .uri("http://product-service/v1/products/search")
                 .bodyValue(productFilter)
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<BaseResponse<List<ProductDTO>>>() {
@@ -38,7 +38,7 @@ public class ProductClientImpl implements ProductClient {
     public boolean lockProduct(LockProductDTO lockProduct) {
         BaseResponse<Boolean> response = webclientBuilder.build()
                 .post()
-                .uri("http://localhost:8888/v1/products/lock")
+                .uri("http://product-service/v1/products/lock")
                 .bodyValue(lockProduct)
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<BaseResponse<Boolean>>() {
